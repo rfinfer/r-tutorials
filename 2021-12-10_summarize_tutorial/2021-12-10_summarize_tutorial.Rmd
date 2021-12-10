@@ -79,14 +79,15 @@ OK, your turn. How would you fix my code above? (Hint, you need to add some extr
 ```{r}
 
 trip_detail_grouped_by_route_day <- trip_detail %>% 
-  group_by(SERVICE_RTE_NUM, ___, ____)
+  group_by(SERVICE_RTE_NUM, DAY_CODE, EXPRESS_LOCAL_CD, OPERATION_DATE)
 ```
 
 
 ```{r}
 route_day_summary <- trip_detail_grouped_by_route_day %>% 
-  summarise(sum_boarings = sum(PSNGR_BOARDINGS), 
-            count_trips = n())
+  summarise(sum_boarings_by_day = sum(PSNGR_BOARDINGS), 
+            count_trips_by_day = n()) %>%
+  mutate (avg_boardings_by_trip = sum_boarings_by_day/count_trips_by_day)
 #each call to summarise will drop one level of grouping since that group is now just a single row. 
 ```
 
@@ -98,6 +99,14 @@ Choose a different grouping variables and create a summary based on that groupin
 
 ```{r}
 #make sure to adjust the object name. Make it descriptive so you remember what it is later. 
+
+route_day_summary1<- trip_detail_grouped_by_route_day %>%
+  summarise(sum_boardings_by_day = sum(PSNGR_BOARDINGS),
+            count_trips_by_day = n()) %>%
+  summarise (days_by_route = n(),
+             sum_boardings = sum(sum_boardings_by_day)) %>%
+  mutate (avg_boardings_by_day = sum_boardings/days_by_route)
+
 trip_detail_summarised_by_YOUR_VARIABLES_HERE <- trip_detail %>% 
   group_by(____, ___, ____) %>% 
   #i separated the commands above for clarity, but I usually pipe them #together. AKA I use %>%  to connect them using "and then" logic
