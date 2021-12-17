@@ -6,8 +6,8 @@ output: html_notebook
 ```{r install packages}
 #ONLY RUN EACH LINE IF YOU DON'T HAVE THE PACKAGE INSTALLED. 
 
-install.packages("DBI")
-install.packages("odbc")
+install.packages("DBI") #passes sql to R
+install.packages("odbc") 
 install.packages("tidyverse")
 
 ```
@@ -123,17 +123,20 @@ write_csv(route_summary_131_132, here::here("output", "Spring_2021_Route_131_132
 How could we write a SQL query to look at average stop boardings for Route 3 and 4 during the Fall 2020 service change?
 
 ```{r}
-stop_summary_3_4 <-  dbGetQuery(con, "SELECT ______, 
-                                _________, 
-                                _________, 
-                                _________ 
-                                  --What columns do we want?
+stop_summary_3_4 <-  dbGetQuery(con, "SELECT SERVICE_RTE_NUM, 
+                                SERVICE_CHANGE_NUM, 
+                                STOP_ID, 
+                                HOST_STREET_NM, 
+                                CROSS_STREET_NM,
+                                AVG_TOTAL_BOARDINGS
                                     
                                     FROM 
-                                    --what schema and table are we looking at? 
+                                    DP.STOP_ACTIVITY_SUMMARY
                                     
                                     WHERE
-                                  -- What are we filtering by? ")
+                                  SERVICE_CHANGE_NUM = 203
+                                AND (SERVICE_RTE_NUM = 3 OR SERVICE_RTE_NUM = 4)
+                                ")
 
 
 ```
@@ -141,9 +144,16 @@ stop_summary_3_4 <-  dbGetQuery(con, "SELECT ______,
 Now that we have the data, practice summarizing or filtering it!
 
 ```{r}
-
+##quintiles
 route_3_4_cleaned_data <- stop_summary_3_4 %>% 
   #analyst's choice! Practice filtering or summarizing the data
+  group_by (SERVICE_RTE_NUM) %>%
+  mutate(quintile_rank = ntile(AVG_TOTAL_BOARDINGS,5))
+
+## top 20 ridership stops
+route_3_4_cleaned_data <- stop_summary_3_4 %>%
+  group_by (SERVICE_RTE_NUM) %>%
+  slice_max(order_by = AVG_TOTAL_BOARDINGS, 20)
 ```
 
 
